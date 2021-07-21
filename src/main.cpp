@@ -36,7 +36,7 @@ int x=0;
 #define MW 10
 
 //Hysterese für Überfeuchtung
-#define HYSTERESE 200
+#define HYSTERESE 100
 
 
 //Pumpenstatus umschalten
@@ -63,9 +63,8 @@ digitalWrite(pump0,LOW);
 void failure()
 {
   deactivateall();
-  //digitalWRITE(LED,HIGH)
-      while(1)
-      {sleep(100000000);}
+  printf("FEHLER-Trocken-Bewässerung gestoppt.");
+  sleep(86400);
 }
 //Funktion für Mittelwert aus MW Messwerten für Bodenfeuchte
 double mittelwert(int * soil)
@@ -211,7 +210,7 @@ void test()
 
   printf("Starte Pumpe\n");
   activatepump();
-  sleep(60);
+  sleep(30);
   
   printf("Öffne Ventil 1\n");
   digitalWrite(vent0,HIGH);
@@ -220,6 +219,7 @@ void test()
   digitalWrite(vent0,LOW);
   sleep(10);
 
+  /*
   printf("Öffne Ventil 2\n");
   digitalWrite(vent1,HIGH);
   sleep(60);
@@ -240,6 +240,7 @@ void test()
   printf("Schließe Ventil 4\n");
   digitalWrite(vent3,LOW);
   sleep(10);
+  */
 
   printf("Deaktiviere Pumpe und alle Ventile\n");
   deactivateall();
@@ -277,12 +278,12 @@ void setup()
   //Kalibrierung der Feuchtigkeit auf Einschaltzustand
   soilshould[0]=getsensor0();
   soilshould[1]=getsensor1();
-  soilshould[2]=getsensor2();
-  soilshould[3]=getsensor3();
-  soilshould[4]=getsensor4();
-  soilshould[5]=getsensor5();
-  soilshould[6]=getsensor6();
-  soilshould[7]=getsensor7();
+  //soilshould[2]=getsensor2();
+  //soilshould[3]=getsensor3();
+  //soilshould[4]=getsensor4();
+  //soilshould[5]=getsensor5();
+  //soilshould[6]=getsensor6();
+  //soilshould[7]=getsensor7();
 
   //Ausgabe der Kalibrierten Werte
   moisturecal();
@@ -291,7 +292,7 @@ void setup()
   test();
 
   //Warte 1min
-  sleep(60);
+  sleep(10);
   }
 
 
@@ -306,12 +307,14 @@ printf("Bewässerungsschleife Durchlauf:%d\n", x);
 {
 soilmid[0]=getsensor0();
 soilmid[1]=getsensor1();
+/*
 soilmid[2]=getsensor2();
 soilmid[3]=getsensor3();
 soilmid[4]=getsensor4();
 soilmid[5]=getsensor5();
 soilmid[6]=getsensor6();
 soilmid[7]=getsensor7();
+*/
 }
 
 //Ausgabe der Feuchtigkeit
@@ -320,11 +323,12 @@ moisturesens();
 //Bewässern, wenn nötig 
 int k=0;
 //VENTIL 0
+//feuchter = niedrigere Spannung
 if((soilmid[k] > soilshould[k]) || (soilmid[k+1] > soilshould[k+1]))
 {
   printf("Bewässerung für %d nötig",k);
   activatepump();
-  delay(2000);
+  delay(5000);
   digitalWrite(vent0,HIGH);
   sleep(120);
 
@@ -332,7 +336,7 @@ if((soilmid[k] > soilshould[k]) || (soilmid[k+1] > soilshould[k+1]))
   int help1, help2, go;
   help1 = getsensor0();
   help2 = getsensor1();
-  if (soilmid[k]-10<= help1 || soilmid[k+1]-10<=help2)
+  if (soilmid[k]<= help1 || soilmid[k+1]<=help2)
     {
       failure();
     }
@@ -348,7 +352,7 @@ if((soilmid[k] > soilshould[k]) || (soilmid[k+1] > soilshould[k+1]))
           int help1, help2;
           help1 = getsensor0();
           help2 = getsensor1();
-          if (soilmid[k]-10<= help1 || soilmid[k+1]-10<=help2)
+          if (soilmid[k]<= help1 || soilmid[k+1]<=help2)
             {       
               failure();
             }
