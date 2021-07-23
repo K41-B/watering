@@ -1,10 +1,13 @@
 #include <Arduino.h>
+#include <PrintEx.h>
 
-//globale Variablen
-int soilmid[8];
-int soilshould[8];
-//Schleifenzähler der Bewässerung
-int x=0;
+PrintEx serial = Serial;
+
+//globale Variablen _ stored in RTC_data
+RTC_DATA_ATTR int soilmid[8];
+RTC_DATA_ATTR int soilshould[8];
+//Schleifenzähler der Bewässerung _ stored in RTC_data
+RTC_DATA_ATTR int x=0;
 
 //Hysterese muss an Werte für Boden und Eigenschaften der Sensoren angepasst werden!
 
@@ -63,8 +66,9 @@ digitalWrite(pump0,LOW);
 void failure()
 {
   deactivateall();
-  printf("FEHLER-Trocken-Bewässerung gestoppt.");
+  serial.printf("FEHLER-Trocken-Bewässerung gestoppt.");
   sleep(86400);
+  serial.printf("Kehre nach 24h nach einem Fehler der Bewässerung zum Programm zurück.");
 }
 //Funktion für Mittelwert aus MW Messwerten für Bodenfeuchte
 double mittelwert(int * soil)
@@ -189,7 +193,7 @@ void moisturecal()
 {
   int i;
   for(i=0;i<8;i++)
-    printf("Sensor:%d | Feuchtigkeitswert:%d\n",i,soilshould[i]);
+    serial.printf("Sensor:%d | Feuchtigkeitswert:%d\n",i,soilshould[i]);
 
 }
 
@@ -198,7 +202,7 @@ void moisturesens()
 {
   int i;
   for(i=0;i<8;i++)
-    printf("Sensor:%d | Sollwert:%d | Feuchtigkeitswert:%d\n" ,i,soilshould[i],soilmid[i]);
+    serial.printf("Sensor:%d | Sollwert:%d | Feuchtigkeitswert:%d\n" ,i,soilshould[i],soilmid[i]);
 
 }
 
@@ -206,16 +210,16 @@ void moisturesens()
 void test()
 {
 //Funktion der Pumpe gegeben?
-  printf("Starte Funktionstest der Wasserversorgung\n");
+  serial.printf("Starte Funktionstest der Wasserversorgung\n");
 
-  printf("Starte Pumpe\n");
+  serial.printf("Starte Pumpe\n");
   activatepump();
   sleep(30);
   
-  printf("Öffne Ventil 1\n");
+  serial.printf("Öffne Ventil 1\n");
   digitalWrite(vent0,HIGH);
   sleep(60);
-  printf("Schließe Ventil 1\n");
+  serial.printf("Schließe Ventil 1\n");
   digitalWrite(vent0,LOW);
   sleep(10);
 
@@ -242,7 +246,7 @@ void test()
   sleep(10);
   */
 
-  printf("Deaktiviere Pumpe und alle Ventile\n");
+  serial.printf("Deaktiviere Pumpe und alle Ventile\n");
   deactivateall();
   }
 
@@ -323,7 +327,7 @@ moisturesens();
 //Bewässern, wenn nötig 
 int k=0;
 //VENTIL 0
-//feuchter = niedrigere Spannung
+//feuchter = niedrigere Spannung -> Wert geringer
 if((soilmid[k] > soilshould[k]) || (soilmid[k+1] > soilshould[k+1]))
 {
   printf("Bewässerung für %d nötig",k);
