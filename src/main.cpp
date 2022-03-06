@@ -22,6 +22,9 @@ RTC_DATA_ATTR int x=0;
 #define in6 27
 #define in7 14
 
+//Wie viele Sensoren sind angeschlossen? -> unbedingt vorab definieren!
+#define anzin 2
+
 //Output für Pumpe
 #define pump0 23
 
@@ -68,7 +71,7 @@ void failure()
   deactivateall();
   serial.printf("FEHLER - Bewässerung gestoppt.");
   sleep(86400);
-  serial.printf("Kehre nach 24h nach einem Fehler der Bewässerung zum Programm zurück.");
+  serial.printf("Kehre nach Fehler in Bewässerung zum Programm zurück.");
 }
 
 //Funktion für Median aus MW Messwerten für Bodenfeuchte
@@ -79,110 +82,33 @@ return soil[index];
 }
 
 
-//Sensorabfrage 0
-int getsensor0()
+//Sensorabfrage
+int getsensor (int sensor)
 {
   int i;
   int soil[MW];
   for (i=0;i<MW;i++)
   {
-  soil[i]=analogRead(in0);
+    int help;
+    switch(sensor)
+                {
+                    case 1: help= in0; break;
+                    case 2: help= in1; break;
+                    case 3: help= in2; break;
+                    case 4: help= in3; break;
+                    case 5: help= in4; break;
+                    case 6: help= in5; break;
+                    case 7: help= in6; break;
+                    case 8: help= in7; break;
+                    default: serial.printf("Fehler bei Abfrage der Sensoren!"); break;
+                }
+
+  soil[i]=analogRead(help);
+  //analogRead erwartet den int des GPIO -> der String muss also als int ausgegeben werden -> define Wert dynamisch abrufen unmöglich (da beim compilen entfernt)
   delay(2000);
   }
  return median(soil);
 }
-
-//Sensorabfrage 1
-int getsensor1()
-{
-  int i;
-  int soil[MW];
-  for (i=0;i<MW;i++)
-  {
-  soil[i]=analogRead(in1);
-  delay(2000);
-  }
- return median(soil);
-}
-
-//Sensorabfrage 2
-int getsensor2()
-{
-  int i;
-  int soil[MW];
-  for (i=0;i<MW;i++)
-  {
-  soil[i]=analogRead(in2);
-  delay(2000);
-  }
- return median(soil);
-}
-
-//Sensorabfrage 3
-int getsensor3()
-{
-  int i;
-  int soil[MW];
-  for (i=0;i<MW;i++)
-  {
-  soil[i]=analogRead(in3);
-  delay(2000);
-  }
- return median(soil);
-}
-
-//Sensorabfrage 4
-int getsensor4()
-{
-  int i;
-  int soil[MW];
-  for (i=0;i<MW;i++)
-  {
-  soil[i]=analogRead(in4);
-  delay(2000);
-  }
- return median(soil);
-}
-
-//Sensorabfrage 5
-int getsensor5()
-{
-  int i;
-  int soil[MW];
-  for (i=0;i<MW;i++)
-  {
-  soil[i]=analogRead(in5);
-  delay(2000);
-  }
- return median(soil);
-}
-
-//Sensorabfrage 6
-int getsensor6()
-{
-  int i;
-  int soil[MW];
-  for (i=0;i<MW;i++)
-  {
-  soil[i]=analogRead(in6);
-  delay(2000);
-  }
- return median(soil);
-}
-
-//Sensorabfrage 7
-int getsensor7()
-{
-  int i;
-  int soil[MW];
-  for (i=0;i<MW;i++)
-  {
-  soil[i]=analogRead(in7);
-  delay(2000);
-  }
- return median(soil);
-}
-
 
 //Ausgabe der Feuchtigkeitswerte pro Sensor
 void moisturecal()
@@ -242,7 +168,7 @@ void test()
   sleep(10);
   */
 
-  serial.printf("Deaktiviere Pumpe und alle Ventile\n");
+  serial.printf("Deaktiviere Pumpe und schliesse alle Ventile\n");
   deactivateall();
   }
 
@@ -287,14 +213,11 @@ void setup()
 
   //Kalibrierung der Feuchtigkeit auf Einschaltzustand
   {
-    soilshould[0]=getsensor0();
-    soilshould[1]=getsensor1();
-    //soilshould[2]=getsensor2();
-    //soilshould[3]=getsensor3();
-    //soilshould[4]=getsensor4();
-    //soilshould[5]=getsensor5();
-    //soilshould[6]=getsensor6();
-    //soilshould[7]=getsensor7();
+for (int input=0; input<anzin; input++)
+    {
+    soilshould[input]=getsensor(input);
+       
+    }   
   }
 
   //Ausgabe der Kalibrierten Werte
@@ -316,18 +239,12 @@ x=x+1;
 serial.printf("Bewässerungsschleife Durchlauf:%d\n", x);
 
 //Prüfung der Werte
-//Abfragedauer ca. 20 sec pro Sensor. -> ca. 2min 40 sec. bei 8 Sensoren.
+//Abfragedauer ca. 20 sec pro Sensor.
 {
-soilmid[0]=getsensor0();
-soilmid[1]=getsensor1();
-/*
-soilmid[2]=getsensor2();
-soilmid[3]=getsensor3();
-soilmid[4]=getsensor4();
-soilmid[5]=getsensor5();
-soilmid[6]=getsensor6();
-soilmid[7]=getsensor7();
-*/
+for (int input=0; input<anzin; input++)
+    {
+        soilmid[input]=getsensor(input);
+    }
 }
 
 //Ausgabe der Feuchtigkeit
@@ -347,8 +264,11 @@ if((soilmid[k] > soilshould[k]) || (soilmid[k+1] > soilshould[k+1]))
 
   //Prüfen ob Bewässerung die Feuchtigkeit erhöht. Wenn nicht failure() auslösen!
   int help1, help2, go;
-  help1 = getsensor0();
-  help2 = getsensor1();
+  {
+      help1 = getsensor(k);
+      help2 = getsensor(k+1);
+  }
+  
   if (soilmid[k]<= help1 || soilmid[k+1]<=help2)
     {
       failure();
@@ -357,14 +277,14 @@ if((soilmid[k] > soilshould[k]) || (soilmid[k+1] > soilshould[k+1]))
   //weiterhin bewässern
   for(go=0; go<1;)
     {
-    soilmid[k]=getsensor0();
-    soilmid[k+1]=getsensor1();
+    soilmid[k]=getsensor(k);
+    soilmid[k+1]=getsensor(k+1);
       if((soilmid[k] > (soilshould[k]-HYSTERESE)) || (soilmid[k+1] > (soilshould[k+1]-HYSTERESE) ))
         {
           sleep(120);
           int help1, help2;
-          help1 = getsensor0();
-          help2 = getsensor1();
+          help1 = getsensor(k);
+          help2 = getsensor(k+1);
           if (soilmid[k]<= help1 || soilmid[k+1]<=help2)
             {       
               failure();
