@@ -35,8 +35,8 @@ RTC_DATA_ATTR int x=0;
 //Sensor6&7 gehören zu Ventil 3
 #define vent3 21
 
-//Anzahl der Messwerte für Mittelwert
-#define MW 10
+//Anzahl der Messwerte für Median -> sollte ungerade sein
+#define MW 9
 
 //Hysterese für Überfeuchtung
 #define HYSTERESE 100
@@ -71,16 +71,11 @@ void failure()
   serial.printf("Kehre nach 24h nach einem Fehler der Bewässerung zum Programm zurück.");
 }
 
-//Funktion für Mittelwert aus MW Messwerten für Bodenfeuchte
-double mittelwert(int * soil)
+//Funktion für Median aus MW Messwerten für Bodenfeuchte
+double median(int * soil)
 {
-int sum=0, i;
-for (i=0; i<MW; i++)
-  {
-    sum=sum+soil[i];
-
-  }
-return sum/MW;
+int index = MW/2;
+return soil[index];
 }
 
 
@@ -94,7 +89,7 @@ int getsensor0()
   soil[i]=analogRead(in0);
   delay(2000);
   }
- return mittelwert(soil);
+ return median(soil);
 }
 
 //Sensorabfrage 1
@@ -107,7 +102,7 @@ int getsensor1()
   soil[i]=analogRead(in1);
   delay(2000);
   }
- return mittelwert(soil);
+ return median(soil);
 }
 
 //Sensorabfrage 2
@@ -120,7 +115,7 @@ int getsensor2()
   soil[i]=analogRead(in2);
   delay(2000);
   }
- return mittelwert(soil);
+ return median(soil);
 }
 
 //Sensorabfrage 3
@@ -133,7 +128,7 @@ int getsensor3()
   soil[i]=analogRead(in3);
   delay(2000);
   }
- return mittelwert(soil);
+ return median(soil);
 }
 
 //Sensorabfrage 4
@@ -146,7 +141,7 @@ int getsensor4()
   soil[i]=analogRead(in4);
   delay(2000);
   }
- return mittelwert(soil);
+ return median(soil);
 }
 
 //Sensorabfrage 5
@@ -159,7 +154,7 @@ int getsensor5()
   soil[i]=analogRead(in5);
   delay(2000);
   }
- return mittelwert(soil);
+ return median(soil);
 }
 
 //Sensorabfrage 6
@@ -172,7 +167,7 @@ int getsensor6()
   soil[i]=analogRead(in6);
   delay(2000);
   }
- return mittelwert(soil);
+ return median(soil);
 }
 
 //Sensorabfrage 7
@@ -185,7 +180,7 @@ int getsensor7()
   soil[i]=analogRead(in7);
   delay(2000);
   }
- return mittelwert(soil);
+ return median(soil);
 }
 
 
@@ -384,6 +379,7 @@ if((soilmid[k] > soilshould[k]) || (soilmid[k+1] > soilshould[k+1]))
 }
 
 /*
+{
 
 //VENTIL 1
 k=2;
@@ -515,7 +511,7 @@ if((soilmid[k] > soilshould[k]) || (soilmid[k+1] > soilshould[k+1]))
         }
     }
 }
-
+}
   */
 
 
