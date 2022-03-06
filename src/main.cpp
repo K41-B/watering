@@ -12,7 +12,7 @@ RTC_DATA_ATTR int x=0;
 
 //Hysterese kann an Werte für Boden und Eigenschaften der Sensoren angepasst werden!
 
-//INPUTS für Sensoren Stiftleiste
+//INPUTS für Sensoren GPIO
 #define in0 34
 #define in1 35
 #define in2 32
@@ -26,16 +26,16 @@ RTC_DATA_ATTR int x=0;
 #define pump0 23
 
 //Output für Ventile
-//Sensoren 0 & 1 gehören zu Ventil0
+//Sensoren 0 & 1 gehören zu Ventil 0
 #define vent0 5
-//Sensoren 2&3 gehören zu Ventil 1
+//Sensoren 2 & 3 gehören zu Ventil 1
 #define vent1 18
-//Sensoren 4&5 gehören zu Ventil 2
+//Sensoren 4 & 5 gehören zu Ventil 2
 #define vent2 19
-//Sensor6&7 gehören zu Ventil 3
+//Sensoren 6 & 7 gehören zu Ventil 3
 #define vent3 21
 
-//Anzahl der Messwerte für Median -> sollte ungerade sein
+//Anzahl der Messwerte (MW) für Median
 #define MW 9
 
 //Hysterese für Überfeuchtung
@@ -72,7 +72,7 @@ void failure()
 }
 
 //Funktion für Median aus MW Messwerten für Bodenfeuchte
-double median(int * soil)
+double median (int * soil)
 {
 int index = MW/2;
 return soil[index];
